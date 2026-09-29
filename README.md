@@ -9,6 +9,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
+* **GitHub Repository**: [https://github.com/akashwork9/distributed-task-scheduler](https://github.com/akashwork9/distributed-task-scheduler)
+* **Local Web Console**: [http://localhost:5173](http://localhost:5173) (Pre-seeded demo credentials: `demo@example.com` / `password123`)
+* **Local REST API / Health**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
+* **Interactive Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
 A production-grade, horizontally scalable, event-driven distributed task and job scheduling platform engineered in **Java 21/25, Spring Boot 3, Apache Kafka, Redis, and PostgreSQL**, coupled with a **React 18 + TypeScript + Tailwind CSS** cloud control plane.
 
 ---

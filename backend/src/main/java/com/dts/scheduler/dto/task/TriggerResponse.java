@@ -12,6 +12,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TriggerResponse {
+    private Long id;
     private Long taskId;
     private String executionId;
     private String status;

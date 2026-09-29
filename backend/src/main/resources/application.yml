@@ -9,7 +9,7 @@ spring:
     active: dev
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/dts_db}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5434/dts_db}
     username: ${DATABASE_USERNAME:dts_user}
     password: ${DATABASE_PASSWORD:dts_password}
     driver-class-name: org.postgresql.Driver
@@ -41,7 +41,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      port: ${REDIS_PORT:6380}
       password: ${REDIS_PASSWORD:}
       timeout: 2000ms
 

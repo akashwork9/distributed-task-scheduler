@@ -78,13 +78,12 @@ public class TaskExecutionConsumer {
         }
     }
 
-    @Transactional
     public void processExecutionWithIdempotency(TaskExecutionEvent event) {
         String executionId = event.getExecutionId();
         Instant now = Instant.now();
 
-        // Idempotency: Attempt atomic state transition to RUNNING
-        Optional<TaskExecution> optionalExecution = taskExecutionRepository.findByExecutionId(executionId);
+        // 1. Transaction 1: Atomically claim & transition to RUNNING
+        Optional<TaskExecution> optionalExecution = taskExecutionRepository.findByExecutionIdWithTask(executionId);
         if (optionalExecution.isEmpty()) {
             log.warn("Execution record [{}] not found in database. Discarding message.", executionId);
             return;
@@ -92,7 +91,7 @@ public class TaskExecutionConsumer {
 
         TaskExecution execution = optionalExecution.get();
 
-        // If execution has already concluded (SUCCESS or FAILED terminal state), ignore duplicate
+        // If execution has already concluded, ignore duplicate
         if (execution.getStatus() == ExecutionStatus.SUCCESS || execution.getStatus() == ExecutionStatus.FAILED) {
             log.info("Idempotent check: Execution [{}] is already in terminal state [{}]. Discarding duplicate.",
                     executionId, execution.getStatus());
@@ -104,9 +103,9 @@ public class TaskExecutionConsumer {
         execution.setWorkerId(workerId);
         execution.setStartedAt(now);
         execution.setAttempt(event.getAttempt());
-        taskExecutionRepository.save(execution);
+        taskExecutionRepository.saveAndFlush(execution);
 
-        // Execute task via polymorphic executor
+        // 2. Perform external network/worker execution OUTSIDE database transaction
         TaskExecutor executor = taskExecutorFactory.getExecutor(event.getTaskType());
         long startNanos = System.nanoTime();
         TaskExecutionResult result = executor.execute(event);
@@ -118,14 +117,20 @@ public class TaskExecutionConsumer {
                 .register(meterRegistry)
                 .record(elapsedMillis, TimeUnit.MILLISECONDS);
 
+        // 3. Transaction 2: Record completion state
         if (result.isSuccess()) {
-            handleExecutionSuccess(execution, result, event);
+            handleExecutionSuccess(executionId, result, event);
         } else {
-            handleExecutionFailure(execution, result, event);
+            handleExecutionFailure(executionId, result, event);
         }
     }
 
-    private void handleExecutionSuccess(TaskExecution execution, TaskExecutionResult result, TaskExecutionEvent event) {
+    @Transactional
+    public void handleExecutionSuccess(String executionId, TaskExecutionResult result, TaskExecutionEvent event) {
+        Optional<TaskExecution> optional = taskExecutionRepository.findByExecutionIdWithTask(executionId);
+        if (optional.isEmpty()) return;
+        TaskExecution execution = optional.get();
+
         Instant completedAt = Instant.now();
         execution.setStatus(ExecutionStatus.SUCCESS);
         execution.setCompletedAt(completedAt);
@@ -139,7 +144,12 @@ public class TaskExecutionConsumer {
         log.info("Execution [{}] succeeded in {}ms", execution.getExecutionId(), result.getDurationMs());
     }
 
-    private void handleExecutionFailure(TaskExecution execution, TaskExecutionResult result, TaskExecutionEvent event) {
+    @Transactional
+    public void handleExecutionFailure(String executionId, TaskExecutionResult result, TaskExecutionEvent event) {
+        Optional<TaskExecution> optional = taskExecutionRepository.findByExecutionIdWithTask(executionId);
+        if (optional.isEmpty()) return;
+        TaskExecution execution = optional.get();
+
         int currentAttempt = event.getAttempt();
         int maxRetries = event.getMaxRetries();
 
@@ -147,7 +157,6 @@ public class TaskExecutionConsumer {
         execution.setErrorMessage(result.getErrorMessage());
 
         if (currentAttempt < maxRetries) {
-            // Calculate exponential backoff with ceiling
             long delaySeconds = (long) (event.getRetryDelaySeconds() * Math.pow(event.getBackoffMultiplier(), currentAttempt - 1));
             delaySeconds = Math.min(delaySeconds, event.getMaxRetryDelaySeconds());
 
@@ -161,7 +170,6 @@ public class TaskExecutionConsumer {
             log.warn("Execution [{}] failed (attempt {}/{}). Retrying with backoff {}s: {}",
                     execution.getExecutionId(), currentAttempt, maxRetries, delaySeconds, result.getErrorMessage());
         } else {
-            // Retries exhausted -> DLQ
             Instant completedAt = Instant.now();
             execution.setStatus(ExecutionStatus.FAILED);
             execution.setCompletedAt(completedAt);

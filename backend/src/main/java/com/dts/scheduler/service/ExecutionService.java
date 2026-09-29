@@ -35,9 +35,17 @@ public class ExecutionService {
     private final AuditService auditService;
 
     @Transactional(readOnly = true)
-    public TaskExecutionResponse getExecutionById(Long id) {
-        TaskExecution execution = taskExecutionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task execution not found with id: " + id));
+    public TaskExecutionResponse getExecutionById(String idOrExecutionId) {
+        TaskExecution execution;
+        try {
+            Long numericId = Long.parseLong(idOrExecutionId);
+            execution = taskExecutionRepository.findByIdWithTask(numericId)
+                    .or(() -> taskExecutionRepository.findByExecutionIdWithTask(idOrExecutionId))
+                    .orElseThrow(() -> new ResourceNotFoundException("Task execution not found with id: " + idOrExecutionId));
+        } catch (NumberFormatException e) {
+            execution = taskExecutionRepository.findByExecutionIdWithTask(idOrExecutionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Task execution not found with executionId: " + idOrExecutionId));
+        }
 
         validateOwnership(execution.getTask());
         return mapToExecutionResponse(execution);

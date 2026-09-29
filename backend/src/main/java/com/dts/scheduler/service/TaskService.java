@@ -269,6 +269,7 @@ public class TaskService {
                 String.valueOf(task.getId()), "Manually triggered execution: " + executionId);
 
         return TriggerResponse.builder()
+                .id(execution.getId())
                 .taskId(task.getId())
                 .executionId(executionId)
                 .status(ExecutionStatus.QUEUED.name())

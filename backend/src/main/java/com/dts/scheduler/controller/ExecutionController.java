@@ -28,8 +28,8 @@ public class ExecutionController {
     }
 
     @GetMapping("/api/executions/{id}")
-    @Operation(summary = "Get execution details", description = "Retrieves deep details, status, worker assignment, and output for an execution")
-    public ResponseEntity<TaskExecutionResponse> getExecutionById(@PathVariable Long id) {
+    @Operation(summary = "Get execution details", description = "Retrieves deep details, status, worker assignment, and output for an execution by numeric ID or execution UUID")
+    public ResponseEntity<TaskExecutionResponse> getExecutionById(@PathVariable String id) {
         return ResponseEntity.ok(executionService.getExecutionById(id));
     }
 

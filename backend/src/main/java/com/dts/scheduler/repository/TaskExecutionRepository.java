@@ -19,10 +19,18 @@ public interface TaskExecutionRepository extends JpaRepository<TaskExecution, Lo
 
     Optional<TaskExecution> findByExecutionId(String executionId);
 
+    @Query("SELECT e FROM TaskExecution e JOIN FETCH e.task WHERE e.executionId = :executionId")
+    Optional<TaskExecution> findByExecutionIdWithTask(@Param("executionId") String executionId);
+
+    @Query("SELECT e FROM TaskExecution e JOIN FETCH e.task WHERE e.id = :id")
+    Optional<TaskExecution> findByIdWithTask(@Param("id") Long id);
+
     Page<TaskExecution> findByTaskIdOrderByCreatedAtDesc(Long taskId, Pageable pageable);
 
     Page<TaskExecution> findByTaskIdAndStatusOrderByCreatedAtDesc(Long taskId, ExecutionStatus status, Pageable pageable);
 
+    @Query(value = "SELECT e FROM TaskExecution e JOIN FETCH e.task ORDER BY e.createdAt DESC",
+           countQuery = "SELECT COUNT(e) FROM TaskExecution e")
     Page<TaskExecution> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     @Query("SELECT COUNT(e) > 0 FROM TaskExecution e WHERE e.task.id = :taskId AND e.status IN ('QUEUED', 'RUNNING')")
@@ -38,7 +46,7 @@ public interface TaskExecutionRepository extends JpaRepository<TaskExecution, Lo
             @Param("workerId") String workerId
     );
 
-    @Query("SELECT e FROM TaskExecution e WHERE e.status = 'RUNNING' AND e.startedAt <= :threshold")
+    @Query("SELECT e FROM TaskExecution e JOIN FETCH e.task WHERE e.status = 'RUNNING' AND e.startedAt <= :threshold")
     List<TaskExecution> findZombieExecutions(@Param("threshold") Instant threshold);
 
     long countByStatus(ExecutionStatus status);

@@ -23,15 +23,30 @@ public class RedisConfig {
     @Value("${spring.data.redis.password:}")
     private String redisPassword;
 
+    @Value("${spring.data.redis.ssl.enabled:false}")
+    private boolean redisSsl;
+
+    @Value("${spring.data.redis.url:}")
+    private String redisUrl;
+
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
-        String address = String.format("redis://%s:%d", redisHost, redisPort);
+        String address;
+        if (redisUrl != null && !redisUrl.isBlank()) {
+            address = redisUrl.startsWith("redis://") || redisUrl.startsWith("rediss://") 
+                    ? redisUrl 
+                    : (redisSsl ? "rediss://" : "redis://") + redisUrl;
+        } else {
+            String protocol = redisSsl ? "rediss" : "redis";
+            address = String.format("%s://%s:%d", protocol, redisHost, redisPort);
+        }
+
         var singleServerConfig = config.useSingleServer()
                 .setAddress(address)
-                .setConnectionMinimumIdleSize(5)
+                .setConnectionMinimumIdleSize(2)
                 .setConnectionPoolSize(20)
-                .setTimeout(3000)
+                .setTimeout(5000)
                 .setRetryAttempts(3)
                 .setRetryInterval(1500);
 

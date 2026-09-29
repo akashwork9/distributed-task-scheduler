@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    show-sql: false
+  flyway:
+    clean-disabled: true
+
+logging:
+  level:
+    root: WARN
+    com.dts.scheduler: INFO

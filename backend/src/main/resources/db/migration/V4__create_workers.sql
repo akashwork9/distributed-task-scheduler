@@ -1,0 +1,14 @@
+-- V4: Create Workers Table
+CREATE TABLE IF NOT EXISTS workers (
+    id BIGSERIAL PRIMARY KEY,
+    worker_id VARCHAR(100) NOT NULL,
+    hostname VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(50),
+    status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
+    last_heartbeat TIMESTAMP WITH TIME ZONE NOT NULL,
+    active_jobs INT NOT NULL DEFAULT 0,
+    capacity INT NOT NULL DEFAULT 10,
+    registered_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_workers_worker_id UNIQUE (worker_id)
+);

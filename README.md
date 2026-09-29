@@ -14,6 +14,14 @@
 * **Local REST API / Health**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
 * **Interactive Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
+### One-Click Cloud Deployments
+
+| Component | 1-Click Deploy Action | Target Service |
+| :--- | :--- | :--- |
+| **Frontend UI** | [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fakashwork9%2Fdistributed-task-scheduler&root-directory=frontend&env=VITE_API_URL&envDescription=Backend%20API%20Endpoint%20URL&project-name=distributed-task-scheduler-ui) | **Vercel** (Global Edge CDN) |
+| **Backend API & Workers** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/akashwork9/distributed-task-scheduler) | **Render** (Docker Container Service) |
+| **Full Stack Monorepo** | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https%3A%2F%2Fgithub.com%2Fakashwork9%2Fdistributed-task-scheduler) | **Railway** (Postgres + Redis + API) |
+
 A production-grade, horizontally scalable, event-driven distributed task and job scheduling platform engineered in **Java 21/25, Spring Boot 3, Apache Kafka, Redis, and PostgreSQL**, coupled with a **React 18 + TypeScript + Tailwind CSS** cloud control plane.
 
 ---

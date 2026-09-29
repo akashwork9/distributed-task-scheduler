@@ -10,7 +10,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 * **GitHub Repository**: [https://github.com/akashwork9/distributed-task-scheduler](https://github.com/akashwork9/distributed-task-scheduler)
-* **Live Public Demo**: [https://sub-immediate-city-faqs.trycloudflare.com](https://sub-immediate-city-faqs.trycloudflare.com)
+* **Live Public Demo**: [https://samples-wifi-specifications-walker.trycloudflare.com](https://samples-wifi-specifications-walker.trycloudflare.com)
 * **Local Web Console**: [http://localhost:5173](http://localhost:5173) (Pre-seeded demo credentials: `demo@example.com` / `password123`)
 * **Local REST API / Health**: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
 * **Interactive Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
